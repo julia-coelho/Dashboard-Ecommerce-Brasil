@@ -70,6 +70,6 @@ Victor Rithelly (Desenvolvedor BackEnd)
 
 - src/ → código do projeto separado em análise, dashboard e utilitários.
 
-    prototypes/ → esboços visuais do dashboard (Figma, imagens, mockups).
+- prototypes/ → esboços visuais do dashboard (Figma, imagens, mockups).
 
-    tests/ → scripts para validar se o código e análises funcionam corretamente.
+- tests/ → scripts para validar se o código e análises funcionam corretamente.
