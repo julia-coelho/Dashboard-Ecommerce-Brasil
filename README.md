@@ -36,32 +36,6 @@ Victor Rithelly (Desenvolvedor BackEnd)
 
 # Estrutura do Repositório
 
- Dashboard-Ecommerce-Brasil
-│── 📄 README.md                -> Descrição geral do projeto (nome, objetivos, papéis, estrutura, etc.)
-│── 📄 .gitignore               -> Definir arquivos/pastas a serem ignorados pelo Git
-│
-├── 📂 docs                     -> Documentação e relatórios
-│   │── 📄 mapa_empatia.md       -> Versão detalhada do mapa de empatia
-│   │── 📄 apresentacao.pptx     -> Slides da apresentação final (quando estiver pronto)
-│
-├── 📂 data                     -> Dados brutos e tratados
-│   │── 📄 dataset.csv           -> Arquivo base de dados
-│   │── 📄 dicionario_dados.md   -> Explicação de cada coluna do dataset
-│   └── 📂 processed             -> Dados tratados para análise
-│
-├── 📂 src                      -> Código-fonte
-│   │── 📂 analysis              -> Scripts de análise exploratória (ex: notebooks Python)
-│   │
-│   │── 📂 dashboard             -> Implementação do dashboard
-│   │
-│   └── 📂 utils                 -> Funções auxiliares (ex.: limpeza de dados, validações)
-│
-├── 📂 prototypes               -> Protótipos e wireframes
-│
-└── 📂 tests                    -> Testes de código e validação
-
-## Explicação da Estrutura
-
 - README.md → principal ponto de entrada (descrição, objetivos, papéis, instruções de uso, etc).
 
 - docs/ → toda a documentação e relatórios.
