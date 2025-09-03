@@ -11,7 +11,7 @@ Este projeto tem como objetivo analisar dados de e-commerce no Brasil com foco n
 # Objetivo Geral
 Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce brasileiro.
 
-Objetivos Específicos
+# Objetivos Específicos
 -Criar um dashboard interativo para visualização de dados de vendas e estoque.
 
 -Identificar rupturas de estoque e produtos com baixo giro.
