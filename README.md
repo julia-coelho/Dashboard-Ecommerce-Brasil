@@ -12,13 +12,13 @@ Este projeto tem como objetivo explorar e analisar dados de e-commerce no Brasil
 Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce brasileiro.
 
 # Objetivos Específicos
--Criar um dashboard interativo para visualização de dados de vendas e estoque.
+- Criar um dashboard interativo para visualização de dados de vendas e estoque.
 
--Identificar rupturas de estoque e produtos com baixo giro.
+- Identificar rupturas de estoque e produtos com baixo giro.
 
--Implementar indicadores de desempenho como taxa de ruptura, cobertura de estoque e curva ABC.
+- Implementar indicadores de desempenho como taxa de ruptura, cobertura de estoque e curva ABC.
 
--Promover análise exploratória de dados, destacando sazonalidade e tendências de compra.
+- Promover análise exploratória de dados, destacando sazonalidade e tendências de compra.
 
 
 # Membros
