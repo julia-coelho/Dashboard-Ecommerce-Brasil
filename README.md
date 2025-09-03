@@ -8,17 +8,17 @@ Projeto Integrador I: Dashboard Ecommerce Brasil
 Este projeto tem como objetivo analisar dados de e-commerce no Brasil com foco no problema de desequilíbrio entre vendas e estoque. Através da criação de um Dashboard interativo, será possível identificar padrões de ruptura de estoque (quando a demanda supera a oferta) e excesso de estoque (quando o produto permanece parado), auxiliando na tomada de decisão de empresas que atuam no comércio eletrônico. Dessa forma, será feito um extenso levantamento de dados para apoiar o projeto https://github.com/julia-coelho/ecommerce (Projeto Integrador II)
 
 
-# Objetivos Iniciais
+# Objetivo Geral
+Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce brasileiro.
 
-- Criar um dashboard interativo para visualização de dados de vendas e estoque.
+Objetivos Específicos
+-Criar um dashboard interativo para visualização de dados de vendas e estoque.
 
-- Identificar rupturas de estoque e produtos com baixo giro.
+-Identificar rupturas de estoque e produtos com baixo giro.
 
-- Implementar indicadores de desempenho como taxa de ruptura, cobertura de estoque e curva ABC.
+-Implementar indicadores de desempenho como taxa de ruptura, cobertura de estoque e curva ABC.
 
-- Promover análise exploratória de dados, destacando sazonalidade e tendências de compra.
-
-- Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce brasileiro.
+-Promover análise exploratória de dados, destacando sazonalidade e tendências de compra.
 
 
 # Membros
