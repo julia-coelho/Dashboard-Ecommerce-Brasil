@@ -20,7 +20,7 @@ Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce
 
 - Promover análise exploratória de dados, destacando sazonalidade e tendências de compra.
 
-- Criar e-commerce integrado com estoque.
+- Criar um e-commerce integrado com estoque.
 
 - Permitir que o administrador publique os produtos no site com preço, descrição e condições de venda.
 
