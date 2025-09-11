@@ -18,17 +18,9 @@ Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce
 
 - Implementar indicadores de desempenho como taxa de ruptura, cobertura de estoque e curva ABC.
 
-- Promover análise exploratória de dados, destacando sazonalidade e tendências de compra.
+- Promover análise exploratória de dados.
 
-- Criar um e-commerce integrado com estoque.
-
-- Permitir que o administrador publique os produtos no site com preço, descrição e condições de venda.
-
-- Habilitar aplicação de promoções em todos os produtos, incluindo descontos, cupons e ofertas sazonais.
-
-- Oferecer opções de pagamento diversificadas: Cartão de Crédito, Cartão de Débito, PIX e Vale-Refeição/Alimentação (VR/VA), com suporte a parcelamento no crédito.
-
-- Garantir segurança e praticidade no checkout, com confirmação em tempo real dos pagamentos, proteção antifraude e notificações automáticas ao cliente.
+- Apoiar na criação um e-commerce integrado com estoque.
 
 
 # Membros
