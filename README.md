@@ -49,3 +49,22 @@ Victor Rithelly (Desenvolvedor BackEnd)
 - prototypes/ → esboços visuais do dashboard (Figma, imagens, mockups).
 
 - tests/ → scripts para validar se o código e análises funcionam corretamente.
+
+# Protótipo do Dashboard
+
+- Tela Inicial
+<img width="678" height="480" alt="image" src="https://github.com/user-attachments/assets/b644770a-9814-4863-ac16-05a3bc876fa7" />
+
+- Tela Estoque
+<img width="676" height="719" alt="image" src="https://github.com/user-attachments/assets/209f498b-99e3-4caf-9b30-dad09df578e7" />
+
+- Tela Vendas
+<img width="615" height="559" alt="image" src="https://github.com/user-attachments/assets/00ea6705-d29f-4cec-803b-aa9414c11701" />
+
+- Tela Curva ABC
+<img width="612" height="655" alt="image" src="https://github.com/user-attachments/assets/b41d3bcd-26c5-44e2-9874-b175179b88a2" />
+
+- Tela Sobre
+<img width="614" height="434" alt="image" src="https://github.com/user-attachments/assets/c3c2d55f-ac36-47b8-86e4-1d8a2ca45ad2" />
+
+
