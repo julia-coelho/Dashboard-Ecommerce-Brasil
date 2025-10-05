@@ -29,7 +29,7 @@ Victor Rithelly (Desenvolvedor BackEnd)
 
 - README.md → principal ponto de entrada (descrição, objetivos, papéis, instruções de uso, etc).
 
-- docs/ → toda a documentação e relatórios.
+- assets/ → toda a documentação e relatórios.
 
 - data/ → datasets (originais e tratados).
 
