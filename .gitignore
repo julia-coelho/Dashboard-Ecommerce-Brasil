@@ -1,1 +1,40 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
 ._*
+
+# Dados grandes (opcional - comente se quiser subir CSVs grandes)
+csv's/Warehouse_and_Retail_Sales.csv
+csv's/2016*.csv
+csv's/2021*.csv
+csv's/2023*.csv
+
+# Credentials
+*.env
+database_setup/.env
+*password*
+*credentials*

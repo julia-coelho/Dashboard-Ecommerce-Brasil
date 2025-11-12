@@ -1,0 +1,14 @@
+# Dependências Python para importação de dados
+# Projeto: Sales Analytics - Power BI - CEUB
+
+# Manipulação de dados
+pandas>=2.0.0
+
+# Conexão com SQL Server / Azure SQL
+pyodbc>=4.0.0
+
+# Conexão com PostgreSQL / Supabase
+psycopg2-binary>=2.9.0
+
+# Opcional: Barra de progresso
+tqdm>=4.65.0
