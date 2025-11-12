@@ -1,53 +1,70 @@
-# Database Setup - Neon PostgreSQL
+# Nome do Projeto
 
-Scripts para importar dados para o banco Neon PostgreSQL.
+Projeto Integrador I: Dashboard Ecommerce Brasil
 
-## Arquivos
 
-- **`import_to_neon.py`** - Script principal de importação de dados
-- **`requirements.txt`** - Dependências Python necessárias
+# Descrição do Projeto
 
-## Uso Rápido
+Este projeto tem como objetivo explorar e analisar dados de e-commerce no Brasil com foco no problema de desequilíbrio entre vendas e estoque. Através da criação de um Dashboard interativo, será possível identificar padrões de ruptura de estoque (quando a demanda supera a oferta) e excesso de estoque (quando o produto permanece parado), auxiliando na tomada de decisão de empresas que atuam no comércio eletrônico. Dessa forma, será feito um extenso levantamento de dados para apoiar o projeto https://github.com/julia-coelho/ecommerce (Projeto Integrador II)
 
-```bash
-# 1. Instalar dependências
-pip install -r requirements.txt
 
-# 2. Executar importação
-python import_to_neon.py
-```
+# Objetivo Geral
+Entregar uma solução que apoie a gestão estratégica de estoque no e-commerce brasileiro.
 
-## Credenciais Neon
+# Objetivos Específicos
+- Criar um dashboard interativo para visualização de dados de vendas e estoque.
 
-As credenciais já estão configuradas no script:
-- **Host:** ep-patient-dawn-aciwozz1-pooler.sa-east-1.aws.neon.tech
-- **Database:** neondb
-- **User:** neondb_owner
-- **Port:** 5432
+- Identificar rupturas de estoque e produtos com baixo giro.
 
-## O que o script faz
+- Implementar indicadores de desempenho como taxa de ruptura, cobertura de estoque e curva ABC.
 
-1. Conecta ao Neon PostgreSQL
-2. Remove tabelas existentes (se houver)
-3. Cria 4 tabelas:
-   - `dimmonth` (444 registros)
-   - `dimcategoria` (8 registros)
-   - `factretailmonthly` (307,644 registros)
-   - `factinventorysnapshotmonthly` (6,785 registros)
-4. Importa dados dos CSVs
-5. Cria índices e relacionamentos
-6. Verifica a importação
+- Promover análise exploratória de dados.
 
-## Tabelas Criadas
+- Apoiar na criação um e-commerce integrado com estoque.
 
-### Dimensões
-- **dimmonth**: Dimensão temporal (1992-2028)
-- **dimcategoria**: Categorias de produtos
 
-### Fatos
-- **factretailmonthly**: Vendas mensais por item
-- **factinventorysnapshotmonthly**: Snapshot de inventário (18/09/2025)
+# Membros
 
-## Próximos Passos
+Júlia Coelho Rodrigues (Líder e Desenvolvedora BackEnd)
 
-Após a importação, use as credenciais acima para conectar o Power BI ao Neon.
+Ricardo Souza Moraes (Analista de Dados e Tester)
+
+Maria Eduarda Jardim (Desenvolvedora FrontEnd e Documentadora)
+
+Letícia Mascarenhas (Desenvolvedora FrontEnd)
+
+Victor Rithelly (Desenvolvedor BackEnd)
+
+
+# Estrutura do Repositório
+
+- README.md → principal ponto de entrada (descrição, objetivos, papéis, instruções de uso, etc).
+
+- docs/ → toda a documentação e relatórios.
+
+- data/ → datasets (originais e tratados).
+
+- src/ → código do projeto separado em análise, dashboard e utilitários.
+
+- prototypes/ → esboços visuais do dashboard (Figma, imagens, mockups).
+
+- tests/ → scripts para validar se o código e análises funcionam corretamente.
+
+# Protótipo do Dashboard
+
+- Tela Inicial
+<img width="678" height="480" alt="image" src="https://github.com/user-attachments/assets/b644770a-9814-4863-ac16-05a3bc876fa7" />
+
+- Tela Estoque
+<img width="676" height="719" alt="image" src="https://github.com/user-attachments/assets/209f498b-99e3-4caf-9b30-dad09df578e7" />
+
+- Tela Vendas
+<img width="615" height="559" alt="image" src="https://github.com/user-attachments/assets/00ea6705-d29f-4cec-803b-aa9414c11701" />
+
+- Tela Curva ABC
+<img width="612" height="655" alt="image" src="https://github.com/user-attachments/assets/b41d3bcd-26c5-44e2-9874-b175179b88a2" />
+
+- Tela Sobre
+<img width="614" height="434" alt="image" src="https://github.com/user-attachments/assets/c3c2d55f-ac36-47b8-86e4-1d8a2ca45ad2" />
+
+
