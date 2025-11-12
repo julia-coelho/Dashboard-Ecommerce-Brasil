@@ -1,33 +1,37 @@
 """
-Script para Importar Dados para Azure SQL Database
+Script para Importar Dados para Neon (PostgreSQL)
 Projeto: Sales Analytics - Power BI - CEUB
 
 Este script:
-1. Conecta no Azure SQL Database
+1. Conecta no Neon PostgreSQL
 2. Cria as tabelas necessárias
 3. Importa os CSVs processados
 4. Aplica transformações (remove NaN, etc.)
 """
 
 import pandas as pd
-import pyodbc
+import psycopg2
+from psycopg2 import sql
 import sys
 from pathlib import Path
 
 # ============================================================================
-# CONFIGURAÇÕES - EDITE AQUI COM SUAS CREDENCIAIS
+# CONFIGURAÇÕES - EDITE AQUI COM SUAS CREDENCIAIS DO NEON
 # ============================================================================
 
-# Credenciais do Azure SQL Database
-SERVER = 'ceub-sales-server.database.windows.net'  # Substitua pelo seu server
-DATABASE = 'sales_analytics_db'  # Substitua pelo seu database
-USERNAME = 'adminceub'  # Substitua pelo seu username
-PASSWORD = 'SUA_SENHA_AQUI'  # ⚠️ SUBSTITUA PELA SUA SENHA!
+# Credenciais do Neon
+# Você encontra essas informações em: Neon Console → Connection String
+HOST = 'ep-patient-dawn-aciwozz1-pooler.sa-east-1.aws.neon.tech'
+PORT = 5432
+DATABASE = 'neondb'
+USER = 'neondb_owner'
+PASSWORD = 'npg_LiH0fcSJjy6b'
 
 # Caminhos dos arquivos CSV
 BASE_DIR = Path(__file__).parent.parent
 CSV_PATHS = {
     'fact_retail_monthly': BASE_DIR / 'data' / 'processed' / 'FactRetailMonthly.csv',
+    'fact_inventory_snapshot': BASE_DIR / 'data' / 'processed' / 'FactInventorySnapshotMonthly.csv',
     'dim_month': BASE_DIR / 'data' / 'dims' / 'dim_month_1992_2028.csv',
     'dim_categoria': BASE_DIR / 'data' / 'dims' / 'DimCategoria.csv'
 }
@@ -38,57 +42,26 @@ CSV_PATHS = {
 
 def create_connection():
     """
-    Cria conexão com Azure SQL Database
+    Cria conexão com Neon PostgreSQL
     """
     try:
-        # Driver ODBC - tenta diferentes versões
-        drivers = [
-            'ODBC Driver 18 for SQL Server',
-            'ODBC Driver 17 for SQL Server',
-            'ODBC Driver 13 for SQL Server',
-            'FreeTDS'  # Alternativa para Mac
-        ]
-
-        driver = None
-        for d in drivers:
-            try:
-                test_conn = f'DRIVER={{{d}}};SERVER={SERVER}'
-                pyodbc.connect(test_conn, timeout=1)
-                driver = d
-                break
-            except:
-                continue
-
-        if not driver:
-            print("❌ Nenhum driver ODBC encontrado!")
-            print("\n📥 Instale o driver:")
-            print("   Mac: brew install msodbcsql18")
-            print("   ou: brew install freetds")
-            sys.exit(1)
-
-        print(f"✓ Driver encontrado: {driver}")
-
-        # String de conexão
-        conn_str = (
-            f'DRIVER={{{driver}}};'
-            f'SERVER={SERVER};'
-            f'DATABASE={DATABASE};'
-            f'UID={USERNAME};'
-            f'PWD={PASSWORD};'
-            f'Encrypt=yes;'
-            f'TrustServerCertificate=no;'
+        conn = psycopg2.connect(
+            host=HOST,
+            port=PORT,
+            database=DATABASE,
+            user=USER,
+            password=PASSWORD,
+            sslmode='require'  # Neon requer SSL
         )
-
-        conn = pyodbc.connect(conn_str, timeout=30)
-        print(f"✓ Conectado ao Azure SQL Database: {DATABASE}")
+        print(f"✓ Conectado ao Neon: {DATABASE}")
         return conn
 
-    except pyodbc.Error as e:
+    except psycopg2.Error as e:
         print(f"❌ Erro ao conectar: {e}")
         print("\n🔍 Verifique:")
-        print("   1. Credenciais corretas (SERVER, DATABASE, USERNAME, PASSWORD)")
-        print("   2. Firewall do Azure permite seu IP")
-        print("   3. Database está rodando no Azure Portal")
+        print("   1. Credenciais corretas (HOST, DATABASE, USER, PASSWORD)")
+        print("   2. Projeto Neon está ativo")
+        print("   3. Internet funcionando")
         sys.exit(1)
 
 
@@ -102,9 +75,10 @@ def create_tables(conn):
 
     # Drop tables se existirem (para re-execução)
     drop_tables = """
-    IF OBJECT_ID('dbo.FactRetailMonthly', 'U') IS NOT NULL DROP TABLE dbo.FactRetailMonthly;
-    IF OBJECT_ID('dbo.DimCategoria', 'U') IS NOT NULL DROP TABLE dbo.DimCategoria;
-    IF OBJECT_ID('dbo.DimMonth', 'U') IS NOT NULL DROP TABLE dbo.DimMonth;
+    DROP TABLE IF EXISTS FactRetailMonthly CASCADE;
+    DROP TABLE IF EXISTS FactInventorySnapshotMonthly CASCADE;
+    DROP TABLE IF EXISTS DimCategoria CASCADE;
+    DROP TABLE IF EXISTS DimMonth CASCADE;
     """
     cursor.execute(drop_tables)
     conn.commit()
@@ -114,11 +88,11 @@ def create_tables(conn):
     CREATE TABLE DimMonth (
         YearMonthKey VARCHAR(6) PRIMARY KEY,
         MonthDate DATE,
-        Year INT,
-        MonthNumber INT,
+        Year INTEGER,
+        MonthNumber INTEGER,
         MonthNamePT VARCHAR(20),
         YearMonth VARCHAR(7),
-        DaysInMonth INT,
+        DaysInMonth INTEGER,
         StartOfMonth DATE,
         EndOfMonth DATE
     );
@@ -129,8 +103,8 @@ def create_tables(conn):
     # Tabela DimCategoria (Dimensão de Categorias)
     create_dim_categoria = """
     CREATE TABLE DimCategoria (
-        CategoriaID INT PRIMARY KEY,
-        ItemType VARCHAR(50),
+        CategoriaID INTEGER PRIMARY KEY,
+        ItemType VARCHAR(50) UNIQUE,
         Categoria VARCHAR(100)
     );
     """
@@ -140,29 +114,63 @@ def create_tables(conn):
     # Tabela FactRetailMonthly (Fato - Vendas Mensais)
     create_fact_retail = """
     CREATE TABLE FactRetailMonthly (
-        YearMonthKey VARCHAR(6) NOT NULL,
-        ItemCode VARCHAR(50) NOT NULL,
-        ItemDescription NVARCHAR(500),
+        YearMonthKey VARCHAR(6),
+        ItemCode VARCHAR(50),
+        ItemDescription TEXT,
         ItemType VARCHAR(50),
-        RetailSales DECIMAL(18,2),
-        RetailTransfers DECIMAL(18,2),
-        WarehouseSales DECIMAL(18,2),
-        TotalSales DECIMAL(18,2),
-        CONSTRAINT FK_FactRetail_DimMonth FOREIGN KEY (YearMonthKey) REFERENCES DimMonth(YearMonthKey),
-        CONSTRAINT FK_FactRetail_DimCategoria FOREIGN KEY (ItemType) REFERENCES DimCategoria(ItemType)
+        RetailSales NUMERIC(18,2),
+        RetailTransfers NUMERIC(18,2),
+        WarehouseSales NUMERIC(18,2),
+        TotalSales NUMERIC(18,2)
     );
     """
     cursor.execute(create_fact_retail)
     print("  ✓ Tabela FactRetailMonthly criada")
 
+    # Tabela FactInventorySnapshotMonthly (Fato - Inventário)
+    create_fact_inventory = """
+    CREATE TABLE FactInventorySnapshotMonthly (
+        YearMonthKey VARCHAR(6),
+        ItemCode VARCHAR(50),
+        ItemDescription TEXT,
+        ItemCategory VARCHAR(100),
+        ItemSize VARCHAR(50),
+        TotalInventory NUMERIC(18,2),
+        Price NUMERIC(18,2),
+        StockValue NUMERIC(18,2),
+        SnapshotDate DATE
+    );
+    """
+    cursor.execute(create_fact_inventory)
+    print("  ✓ Tabela FactInventorySnapshotMonthly criada")
+
     # Criar índices para melhor performance
     create_indexes = """
-    CREATE INDEX IX_FactRetail_YearMonthKey ON FactRetailMonthly(YearMonthKey);
-    CREATE INDEX IX_FactRetail_ItemCode ON FactRetailMonthly(ItemCode);
-    CREATE INDEX IX_FactRetail_ItemType ON FactRetailMonthly(ItemType);
+    CREATE INDEX idx_fact_retail_yearmonth ON FactRetailMonthly(YearMonthKey);
+    CREATE INDEX idx_fact_retail_itemcode ON FactRetailMonthly(ItemCode);
+    CREATE INDEX idx_fact_retail_itemtype ON FactRetailMonthly(ItemType);
+    CREATE INDEX idx_fact_inventory_yearmonth ON FactInventorySnapshotMonthly(YearMonthKey);
+    CREATE INDEX idx_fact_inventory_itemcode ON FactInventorySnapshotMonthly(ItemCode);
     """
     cursor.execute(create_indexes)
     print("  ✓ Índices criados")
+
+    # Criar foreign keys
+    create_fks = """
+    ALTER TABLE FactRetailMonthly
+    ADD CONSTRAINT fk_fact_retail_dimmonth
+    FOREIGN KEY (YearMonthKey) REFERENCES DimMonth(YearMonthKey);
+
+    ALTER TABLE FactRetailMonthly
+    ADD CONSTRAINT fk_fact_retail_dimcategoria
+    FOREIGN KEY (ItemType) REFERENCES DimCategoria(ItemType);
+
+    ALTER TABLE FactInventorySnapshotMonthly
+    ADD CONSTRAINT fk_fact_inventory_dimmonth
+    FOREIGN KEY (YearMonthKey) REFERENCES DimMonth(YearMonthKey);
+    """
+    cursor.execute(create_fks)
+    print("  ✓ Foreign keys criadas")
 
     conn.commit()
     print("✓ Todas as tabelas criadas com sucesso!\n")
@@ -183,8 +191,8 @@ def import_csv_data(conn):
     for _, row in df_categoria.iterrows():
         cursor.execute("""
             INSERT INTO DimCategoria (CategoriaID, ItemType, Categoria)
-            VALUES (?, ?, ?)
-        """, row['CategoriaID'], row['ItemType'], row['Categoria'])
+            VALUES (%s, %s, %s)
+        """, (int(row['CategoriaID']), row['ItemType'], row['Categoria']))
 
     conn.commit()
     print(f"    ✓ {len(df_categoria)} registros importados\n")
@@ -204,17 +212,19 @@ def import_csv_data(conn):
                 YearMonthKey, MonthDate, Year, MonthNumber,
                 MonthNamePT, YearMonth, DaysInMonth, StartOfMonth, EndOfMonth
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,
-            str(row['YearMonthKey']),
-            row['MonthDate'],
-            row['Year'],
-            row['MonthNumber'],
-            row['MonthNamePT'],
-            row['YearMonth'],
-            row['DaysInMonth'],
-            row['StartOfMonth'],
-            row['EndOfMonth']
+            (
+                str(row['YearMonthKey']),
+                row['MonthDate'],
+                int(row['Year']),
+                int(row['MonthNumber']),
+                row['MonthNamePT'],
+                row['YearMonth'],
+                int(row['DaysInMonth']),
+                row['StartOfMonth'],
+                row['EndOfMonth']
+            )
         )
 
     conn.commit()
@@ -250,29 +260,79 @@ def import_csv_data(conn):
     for i in range(0, total_rows, batch_size):
         batch = df_fact.iloc[i:i+batch_size]
 
-        for _, row in batch.iterrows():
-            cursor.execute("""
-                INSERT INTO FactRetailMonthly (
-                    YearMonthKey, ItemCode, ItemDescription, ItemType,
-                    RetailSales, RetailTransfers, WarehouseSales, TotalSales
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                row['YearMonthKey'],
-                row['ItemCode'],
-                row['ItemDescription'],
-                row['ItemType'],
-                float(row['RetailSales']),
-                float(row['RetailTransfers']),
-                float(row['WarehouseSales']),
-                float(row['TotalSales'])
-            )
+        # Usar COPY com CSV adequadamente escapado
+        from io import StringIO
+        buffer = StringIO()
+        batch[['YearMonthKey', 'ItemCode', 'ItemDescription', 'ItemType',
+               'RetailSales', 'RetailTransfers', 'WarehouseSales', 'TotalSales']].to_csv(
+            buffer, index=False, header=False, quoting=1  # QUOTE_ALL para escapar vírgulas
+        )
+        buffer.seek(0)
+
+        cursor.copy_expert(
+            """COPY factretailmonthly (yearmonthkey, itemcode, itemdescription, itemtype,
+                    retailsales, retailtransfers, warehousesales, totalsales)
+               FROM STDIN WITH CSV""",
+            buffer
+        )
 
         conn.commit()
         progress = min(i + batch_size, total_rows)
         print(f"    → Progresso: {progress}/{total_rows} registros ({progress*100//total_rows}%)")
 
     print(f"    ✓ {len(df_fact)} registros importados\n")
+
+    # 4. Importar FactInventorySnapshotMonthly
+    print("  → Importando FactInventorySnapshotMonthly...")
+    df_inventory = pd.read_csv(CSV_PATHS['fact_inventory_snapshot'])
+
+    # Tratamento de dados
+    print("    → Tratando dados (removendo NaN)...")
+    original_count_inv = len(df_inventory)
+
+    # Remover linhas com NaN em colunas críticas
+    df_inventory = df_inventory.dropna(subset=['YearMonthKey', 'ItemCode', 'Price', 'TotalInventory'])
+
+    # Preencher NaN em colunas numéricas com 0
+    df_inventory['StockValue'] = df_inventory['StockValue'].fillna(0)
+
+    # Preencher NaN em colunas texto
+    df_inventory['ItemDescription'] = df_inventory['ItemDescription'].fillna('')
+    df_inventory['ItemCategory'] = df_inventory['ItemCategory'].fillna('UNKNOWN')
+    df_inventory['ItemSize'] = df_inventory['ItemSize'].fillna('')
+
+    removed_count_inv = original_count_inv - len(df_inventory)
+    if removed_count_inv > 0:
+        print(f"    ⚠️  {removed_count_inv} linhas removidas por falta de dados críticos")
+
+    # Inserir dados em lotes
+    batch_size = 1000
+    total_rows_inv = len(df_inventory)
+
+    for i in range(0, total_rows_inv, batch_size):
+        batch = df_inventory.iloc[i:i+batch_size]
+
+        # Usar COPY com CSV adequadamente escapado
+        from io import StringIO
+        buffer = StringIO()
+        batch[['YearMonthKey', 'ItemCode', 'ItemDescription', 'ItemCategory', 'ItemSize',
+               'TotalInventory', 'Price', 'StockValue', 'SnapshotDate']].to_csv(
+            buffer, index=False, header=False, quoting=1
+        )
+        buffer.seek(0)
+
+        cursor.copy_expert(
+            """COPY factinventorysnapshotmonthly (yearmonthkey, itemcode, itemdescription, itemcategory, itemsize,
+                    totalinventory, price, stockvalue, snapshotdate)
+               FROM STDIN WITH CSV""",
+            buffer
+        )
+
+        conn.commit()
+        progress = min(i + batch_size, total_rows_inv)
+        print(f"    → Progresso: {progress}/{total_rows_inv} registros ({progress*100//total_rows_inv}%)")
+
+    print(f"    ✓ {len(df_inventory)} registros importados\n")
 
 
 def verify_import(conn):
@@ -284,7 +344,7 @@ def verify_import(conn):
     print("🔍 Verificando importação...\n")
 
     # Contar registros em cada tabela
-    tables = ['DimMonth', 'DimCategoria', 'FactRetailMonthly']
+    tables = ['dimmonth', 'dimcategoria', 'factretailmonthly', 'factinventorysnapshotmonthly']
 
     for table in tables:
         cursor.execute(f"SELECT COUNT(*) FROM {table}")
@@ -296,10 +356,10 @@ def verify_import(conn):
 
     # Chaves órfãs em FactRetailMonthly (YearMonthKey)
     cursor.execute("""
-        SELECT COUNT(DISTINCT f.YearMonthKey)
-        FROM FactRetailMonthly f
-        LEFT JOIN DimMonth d ON f.YearMonthKey = d.YearMonthKey
-        WHERE d.YearMonthKey IS NULL
+        SELECT COUNT(DISTINCT f.yearmonthkey)
+        FROM factretailmonthly f
+        LEFT JOIN dimmonth d ON f.yearmonthkey = d.yearmonthkey
+        WHERE d.yearmonthkey IS NULL
     """)
     orphan_months = cursor.fetchone()[0]
 
@@ -310,10 +370,10 @@ def verify_import(conn):
 
     # Chaves órfãs em FactRetailMonthly (ItemType)
     cursor.execute("""
-        SELECT COUNT(DISTINCT f.ItemType)
-        FROM FactRetailMonthly f
-        LEFT JOIN DimCategoria d ON f.ItemType = d.ItemType
-        WHERE d.ItemType IS NULL
+        SELECT COUNT(DISTINCT f.itemtype)
+        FROM factretailmonthly f
+        LEFT JOIN dimcategoria d ON f.itemtype = d.itemtype
+        WHERE d.itemtype IS NULL
     """)
     orphan_types = cursor.fetchone()[0]
 
@@ -331,7 +391,7 @@ def verify_import(conn):
 
 def main():
     print("=" * 80)
-    print("IMPORTAÇÃO DE DADOS PARA AZURE SQL DATABASE")
+    print("IMPORTAÇÃO DE DADOS PARA NEON (PostgreSQL)")
     print("Projeto: Sales Analytics - Power BI - CEUB")
     print("=" * 80)
     print()
@@ -362,11 +422,11 @@ def main():
         print("🎉 PROCESSO CONCLUÍDO COM SUCESSO!")
         print("=" * 80)
         print("\n📊 Próximos passos:")
-        print("  1. Conecte o Power BI Desktop ao Azure SQL Database")
+        print("  1. Conecte o Power BI Desktop ao Neon")
         print("  2. Use as credenciais:")
-        print(f"     Server: {SERVER}")
+        print(f"     Host: {HOST}")
         print(f"     Database: {DATABASE}")
-        print(f"     Username: {USERNAME}")
+        print(f"     User: {USER}")
         print("  3. Crie os relacionamentos no modelo")
         print("  4. Implemente as medidas DAX")
         print()
