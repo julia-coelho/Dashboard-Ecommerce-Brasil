@@ -1,9 +1,0 @@
-CategoriaID,ItemType,Categoria
-1,BEER,Bebidas Alcoólicas
-2,KEGS,Bebidas Alcoólicas
-3,LIQUOR,Bebidas Alcoólicas
-4,WINE,Bebidas Alcoólicas
-5,STR_SUPPLIES,Suprimentos
-6,NON-ALCOHOL,Bebidas Não-Alcoólicas
-7,REF,Materiais de Reposição
-8,DUNNAGE,Materiais de Embalagem
